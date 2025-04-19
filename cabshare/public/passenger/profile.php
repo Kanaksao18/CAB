@@ -13,20 +13,18 @@ $error_message = '';
 
 // Initialize user data array with default values
 $user = [
-    'first_name' => '',
-    'last_name' => '',
+    'full_name' => '',
     'email' => '',
-    'phone' => '',
+    'phone_number' => '',
     'gender' => '',
     'date_of_birth' => ''
 ];
 
-// First, ensure the users table has all required columns
+// Ensure the `users` table has all required columns
 try {
     $alter_table_queries = [
         "ALTER TABLE users 
-         ADD COLUMN IF NOT EXISTS last_name VARCHAR(100) AFTER first_name,
-         ADD COLUMN IF NOT EXISTS gender ENUM('male', 'female', 'other') NULL AFTER phone,
+         ADD COLUMN IF NOT EXISTS gender ENUM('male', 'female', 'other') NULL AFTER phone_number,
          ADD COLUMN IF NOT EXISTS date_of_birth DATE NULL AFTER gender"
     ];
 
@@ -38,7 +36,7 @@ try {
 }
 
 // Get user data with error handling
-$query = "SELECT * FROM users WHERE id = ?";
+$query = "SELECT full_name, email, phone_number, gender, date_of_birth FROM users WHERE id = ?";
 
 try {
     if ($stmt = $conn->prepare($query)) {
@@ -64,9 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $update_query = "
             UPDATE users 
-            SET first_name = ?,
-                last_name = ?,
-                phone = ?,
+            SET full_name = ?,
+                phone_number = ?,
                 email = ?,
                 gender = ?,
                 date_of_birth = ?
@@ -75,10 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($update_stmt = $conn->prepare($update_query)) {
             $update_stmt->bind_param(
-                "ssssssi",
-                $_POST['first_name'],
-                $_POST['last_name'],
-                $_POST['phone'],
+                "sssssi",
+                $_POST['full_name'],
+                $_POST['phone_number'],
                 $_POST['email'],
                 $_POST['gender'],
                 $_POST['date_of_birth'],
@@ -132,7 +128,7 @@ ob_start();
                     </div>
                     <div class="pt-1.5">
                         <h1 class="text-2xl font-bold text-gray-900">
-                            <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>
+                            <?php echo htmlspecialchars($user['full_name']); ?>
                         </h1>
                         <p class="text-sm font-medium text-gray-500">Passenger Account</p>
                     </div>
@@ -181,16 +177,9 @@ ob_start();
                 <form method="POST" class="divide-y divide-gray-200">
                     <div class="px-6 py-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
                         <div>
-                            <label for="first_name" class="block text-sm font-medium text-gray-700">First name</label>
-                            <input type="text" name="first_name" id="first_name" 
-                                   value="<?php echo htmlspecialchars($user['first_name']); ?>" required
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label for="last_name" class="block text-sm font-medium text-gray-700">Last name</label>
-                            <input type="text" name="last_name" id="last_name" 
-                                   value="<?php echo htmlspecialchars($user['last_name']); ?>" required
+                            <label for="full_name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" name="full_name" id="full_name" 
+                                   value="<?php echo htmlspecialchars($user['full_name']); ?>" required
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
 
@@ -202,9 +191,9 @@ ob_start();
                         </div>
 
                         <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone number</label>
-                            <input type="tel" name="phone" id="phone" 
-                                   value="<?php echo htmlspecialchars($user['phone']); ?>" required
+                            <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input type="tel" name="phone_number" id="phone_number" 
+                                   value="<?php echo htmlspecialchars($user['phone_number']); ?>" required
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
 
@@ -275,4 +264,4 @@ ob_start();
 <?php
 $content = ob_get_clean();
 include '../../includes/components/layout.php';
-?> 
+?>
